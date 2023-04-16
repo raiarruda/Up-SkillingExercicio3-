@@ -9,50 +9,6 @@ double valorMinuto = 0;
 
 Console.WriteLine("Sistema de Estacionamento");
 
-/*TESTEEEES
-
-Guid idCTeste = Guid.NewGuid();
-dynamic clienteT = new
-{
-    Id = idCTeste,
-    Nome = "Juliano",
-    Cpf = "1"
-};
-clientes.Add(clienteT);
-
-dynamic veiculoT = new
-{
-    IdCliente = idCTeste,
-    Marca = "Renault",
-    Modelo = "Sandero",
-    Placa = "IRF5866"
-};
-veiculos.Add(veiculoT);
-
-valorMinuto = 5;
-
-dynamic registroT = new
-{
-    IdCliente = idCTeste,
-    Placa = "IRF5866",
-    Tipo = "ENTRADA",
-    Marcacao = DateTime.Now
-};
-
-registros.Add(registroT);
-
-dynamic registroT2 = new
-{
-    IdCliente = idCTeste,
-    Placa = "IRF5866",
-    Tipo = "SAÍDA",
-    Marcacao = DateTime.Now.AddMinutes(32)
-};
-
-registros.Add(registroT2);
-
-/*FIM TESTEEEES*/
-
 while (true)
 {
     Console.Clear();
@@ -66,7 +22,8 @@ while (true)
     Console.WriteLine("6 - Lista de Clientes");
     Console.WriteLine("7 - Lista de Veículos");
     Console.WriteLine("8 - Relatório de entradas e saídas");
-    Console.WriteLine("9 - Sair");
+    Console.WriteLine("9 - Registro manual de Entrada / Saída");
+    Console.WriteLine("10 - Sair");
 
     var opcao = campo("\r\nOpção:");
     var sair = false;
@@ -135,59 +92,7 @@ while (true)
             break;
         //Registro de entrada e saída de veículos
         case "4":
-            Console.WriteLine("=== Registro entrada/saída ===");
-            Console.Clear();
-            Console.WriteLine("Digite uma das opções abaixo:");
-            Console.WriteLine("1 - Registrar entrada");
-            Console.WriteLine("2 - Registrar saída");
-            Console.WriteLine("3 - Sair");
-
-            var opcao4 = campo("\r\nOpção:");
-            var sair4 = false;
-
-            var tipo = "";
-            switch (opcao4)
-            {
-                case "1":
-                    tipo = "E";
-                    break;
-                case "2":
-                    tipo = "S";
-                    break;
-                default:
-                    sair4 = true;
-                    break;
-            }
-            if (sair4) continue;
-
-            var registroCPF = campo("Digite o CPF do cliente:");
-            dynamic cliente4 = dadosCliente(registroCPF ?? "");
-            if (cliente4 is null) continue;
-
-            dynamic veiculo4 = dadosVeiculo(cliente4.Id);
-            if (veiculo4 is null) continue;
-
-            string? _tipo = (tipo == "E" ? "ENTRADA" : (tipo == "S" ? "SAÍDA" : "ERRO"));
-
-            dynamic registro = new
-            {
-                IdCliente = cliente4.Id,
-                Placa = veiculo4.Placa,
-                Tipo = _tipo,
-                Marcacao = DateTime.Now
-            };
-
-            registros.Add(registro);
-
-            if (_tipo == "ERRO")
-            {
-                Console.WriteLine("Erro no registro!");
-            }
-            else 
-            {
-                Console.WriteLine(_tipo + " registrada com sucesso!");
-            }            
-            Thread.Sleep(1000);
+            registroEntradaSaida(false);
             break;
         //Gera o valor à pagar
         case "5":
@@ -248,6 +153,9 @@ while (true)
 
             Console.WriteLine("Pressione Enter para continuar ...");
             Console.ReadKey();
+            break;
+        case "9":
+            registroEntradaSaida(true);
             break;
         default:
             sair = true;
@@ -356,4 +264,73 @@ string campo(string _label)
         if (string.IsNullOrEmpty(userInput)) Console.CursorTop--;
     }
     return userInput;
+}
+
+void registroEntradaSaida(bool manual)
+{
+    Console.WriteLine("=== Registro " + (manual ? "manual " : "") + "de entrada / saída ===");
+    Console.Clear();
+    Console.WriteLine("Digite uma das opções abaixo:");
+    Console.WriteLine("1 - Registrar entrada");
+    Console.WriteLine("2 - Registrar saída");
+    Console.WriteLine("3 - Sair");
+
+    var opcao4 = campo("\r\nOpção:");
+    var sair4 = false;
+
+    var tipo = "";
+    switch (opcao4)
+    {
+        case "1":
+            tipo = "E";
+            break;
+        case "2":
+            tipo = "S";
+            break;
+        default:
+            sair4 = true;
+            break;
+    }
+    if (sair4) return;
+
+    var registroCPF = campo("Digite o CPF do cliente:");
+    dynamic cliente4 = dadosCliente(registroCPF ?? "");
+    if (cliente4 is null) return;
+
+    dynamic veiculo4 = dadosVeiculo(cliente4.Id);
+    if (veiculo4 is null) return;
+
+    string? _tipo = (tipo == "E" ? "ENTRADA" : (tipo == "S" ? "SAÍDA" : "ERRO"));
+
+    DateTime registroMarcacao = DateTime.Now;
+    if (manual)
+    {
+        //var dataMarcacao = campo("Data do registro");
+        var dataMarcacao = DateTime.Now.Date.ToString("dd/MM/yyyy");
+        var horaMarcacao = campo("Hora do registro");
+        var dataHoraMarcacao = dataMarcacao + " " + horaMarcacao;
+        if (dataHoraMarcacao.Trim() != "") {
+            registroMarcacao = DateTime.Parse(dataHoraMarcacao);
+        }
+    }
+
+    dynamic registro = new
+    {
+        IdCliente = cliente4.Id,
+        Placa = veiculo4.Placa,
+        Tipo = _tipo,
+        Marcacao = registroMarcacao
+    };
+
+    registros.Add(registro);
+
+    if (_tipo == "ERRO")
+    {
+        Console.WriteLine("Erro no registro!");
+    }
+    else
+    {
+        Console.WriteLine(_tipo + " registrada com sucesso!");
+    }
+    Thread.Sleep(1000);
 }
