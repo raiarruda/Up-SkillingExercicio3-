@@ -6,6 +6,20 @@ List<(Guid idCliente, string marca, string modelo, string placa)> veiculos = new
 List<(Guid idCliente, DateTime entrada, DateTime saida, bool saiu)> movimentacoes = new List<(Guid, DateTime, DateTime, bool)>();
 decimal valorPorHora = 1.5M;
 
+
+var c1 = (Guid.NewGuid(), "Raissa", "123");
+var c2 = (Guid.NewGuid(), "Thiago", "456");
+var v1 = (c1.Item1, "aa", "aa", "as");
+var v2 = (c2.Item1, "55", "ww", "qq");
+var m1 = (c1.Item1, new DateTime(2023, 4, 17, 10, 30, 0), new DateTime(2023, 4, 17, 11, 40, 0), true);
+var m2 = (c2.Item1, new DateTime(2023, 4, 17, 10, 30, 0), new DateTime(2023, 4, 17, 11, 40, 0), false);
+clientes.Add(c1);
+veiculos.Add(v1);
+movimentacoes.Add(m1);
+clientes.Add(c2);
+veiculos.Add(v2);
+movimentacoes.Add(m2);
+
 while (executar)
 {
     Console.Clear();
@@ -200,6 +214,7 @@ void ExibirClientes()
         
         return;
     }
+
     clientes.ForEach(cliente =>
     {
         Console.WriteLine($@"
@@ -208,6 +223,8 @@ void ExibirClientes()
                 CPF  = {cliente.cpf}
         ");
     });
+
+    CliqueParaContinuar();
 }
 
 void CadastrarCliente()
@@ -310,6 +327,7 @@ decimal CalcularValorAPagar(TimeSpan duracao)
 
 void ExibirHistoricoMovimentacoesFechadas()
 {
+    Console.Clear();
     var movimentacoesFechadas = movimentacoes.FindAll(m => m.saiu = true);
     if (!movimentacoesFechadas.Any())
     {
@@ -329,8 +347,8 @@ void ExibirHistoricoMovimentacoesFechadas()
                 Modelo: {veiculo.modelo}
                 Marca: {veiculo.marca}
 
-                Entrada: {movimentacao.entrada.ToShortDateString} {movimentacao.entrada.ToShortTimeString}
-                Saida: {movimentacao.saida.ToShortDateString} {movimentacao.saida.ToShortTimeString}
+                Entrada: {movimentacao.entrada.ToShortDateString()} {movimentacao.entrada.ToShortTimeString()}
+                Saida: {movimentacao.saida.ToShortDateString()} {movimentacao.saida.ToShortTimeString()}
 
                 Tempo total: {duracao}
                 Valor total: {CalcularValorAPagar(duracao)}
@@ -344,6 +362,7 @@ void ExibirHistoricoMovimentacoesFechadas()
 
 void ExibirHistoricoMovimentacoesAbertas()
 {
+    Console.Clear();
     var movimentacoesAbertas = movimentacoes.FindAll(m => m.saiu = true);
     if (!movimentacoesAbertas.Any())
     {
@@ -362,7 +381,7 @@ void ExibirHistoricoMovimentacoesAbertas()
                 Modelo: {veiculo.modelo}
                 Marca: {veiculo.marca}
 
-                Entrada: {movimentacao.entrada.ToShortDateString} {movimentacao.entrada.ToShortTimeString}
+                Entrada: {movimentacao.entrada.ToShortDateString()} {movimentacao.entrada.ToShortTimeString()}
               
                 ");
     });
