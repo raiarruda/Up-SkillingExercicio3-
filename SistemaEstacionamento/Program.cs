@@ -1,14 +1,18 @@
-﻿using SistemaEstacionamento.Model;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using SistemaEstacionamento.Data;
+using SistemaEstacionamento.Model;
+using SistemaEstacionamento.Repository;
+using SistemaEstacionamento.Service;
 
 public class Program
 {
+    public static IEstacionamentoService _estacionamentoService;
 
-    private static void Main(string[] args)
+    public static void Main(string[] args)
     {
-        List<Cliente> clientes = new List<Cliente>();
-        List<Veiculo> veiculos = new List<Veiculo>();
-        List<Aluguel> alugueis = new List<Aluguel>();
-        var relacaoCarroAlugado = new List<dynamic>();
+        using IHost host = CreateHostBuilder(args).Build();
+        _estacionamentoService = host.Services.GetService<IEstacionamentoService>();
 
 
         while (true)
@@ -21,7 +25,8 @@ public class Program
             Console.WriteLine("4 - Listar veículo");
             Console.WriteLine("5 - Listar aluguel");
             Console.WriteLine("6 - Alugar");
-            Console.WriteLine("7 - Sair");
+            Console.WriteLine("7 - Devolução");
+            Console.WriteLine("8 - Sair");
 
             var opcao = Console.ReadLine();
             var sair = false;
@@ -29,53 +34,22 @@ public class Program
             switch (opcao)
             {
                 case "1":
-                    Console.Clear();
 
-                    Cliente cliente = new Cliente();
-                    Console.WriteLine("Digite o nome do cliente");
-                    var nome = Console.ReadLine();
-                    Console.WriteLine("Digite o cpf do cliente");
-                    var cpf = Console.ReadLine();
-
-                    cliente = new Cliente
-                    {
-                        Id = new Guid(),
-                        Nome = nome,
-                        CPF = cpf
-                    };
-
-                    clientes.Add(cliente);
-
-                    Console.WriteLine("Cliente cadastrado com sucesso ...");
-
-                    Thread.Sleep(1000);
+                    _estacionamentoService.CadastrarCliente();
+                    Console.WriteLine("Pressione para continuar.");
+                    Console.ReadKey();
                     break;
                 case "2":
 
-                    Veiculo veiculo = new Veiculo();
-                    Console.WriteLine("Digite a marca");
-                    var marca = Console.ReadLine();
-                    Console.WriteLine("Digite o modelo");
-                    var modelo = Console.ReadLine();
-                    Console.WriteLine("Digite a placa");
-                    var placa = Console.ReadLine();
-
-                    veiculo = new Veiculo
-                    {
-                        Marca = marca,
-                        Modelo = modelo,
-                        Placa = placa
-                    };
-
-                    veiculos.Add(veiculo);
-
-                    Console.WriteLine("Veiculo cadastrado com sucesso ...");
-                    Thread.Sleep(1000);
+                    _estacionamentoService.CadastrarVeiculo();
+                    Console.WriteLine("Pressione para continuar.");
+                    Console.ReadKey();
 
                     break;
                 case "3":
                     Console.WriteLine("=== Lista de clientes =====");
 
+                   var clientes =  _estacionamentoService.ListaClientes();
                     foreach (var i in clientes)
                     {
                         Console.WriteLine($"Cliente: " + i.Nome);
@@ -87,9 +61,15 @@ public class Program
                 case "4":
                     Console.WriteLine("=== Lista de veiculos =====");
 
-                    foreach (var i in veiculos)
+                    var veiculos = _estacionamentoService.ListVeiculos();
+                    foreach (var veiculo in veiculos)
                     {
-                        Console.WriteLine($"Cliente: " + i.Modelo);
+                        Console.WriteLine($@"
+                            Cliente = {_estacionamentoService.BuscaClientePorId(veiculo.Id_cliente).Nome}
+                            Marca = {veiculo.Marca}
+                            Modelo  = {veiculo.Modelo}
+                            Placa  = {veiculo.Placa}
+                        ");
                     }
                     Console.WriteLine("Pressione Enter para continuar ...");
                     Console.ReadKey();
@@ -98,28 +78,28 @@ public class Program
                 case "5":
                     Console.WriteLine("=== Relação de carros alugados =====");
 
-                    foreach (var i in alugueis)
-                    {
+                    //foreach (var i in alugueis)
+                    //{
 
-                        dynamic CarroAlugado = new
-                        {
-                            Nome = clientes.Where(x => x.Id == i.Id_cliente).FirstOrDefault().Nome,
-                            Placa = veiculos.Where(x => x.Id == i.Id_carro).FirstOrDefault().Placa,
-                            Modelo = veiculos.Where(x => x.Id == i.Id_carro).FirstOrDefault().Modelo,
-                            Horario = i.Horario
-                        };
+                    //    dynamic CarroAlugado = new
+                    //    {
+                    //        Nome = clientes.Where(x => x.Id == i.Id_cliente).FirstOrDefault().Nome,
+                    //        Placa = veiculos.Where(x => x.Id == i.Id_carro).FirstOrDefault().Placa,
+                    //        Modelo = veiculos.Where(x => x.Id == i.Id_carro).FirstOrDefault().Modelo,
+                    //        Horario = i.HorarioEntrada
+                    //    };
 
-                        relacaoCarroAlugado.Add(CarroAlugado);
+                    //    relacaoCarroAlugado.Add(CarroAlugado);
 
-                    }
-                    foreach (var i in relacaoCarroAlugado)
-                    {
-                        Console.WriteLine("Cliente: " + i.Nome);
-                        Console.WriteLine("Placa: " + i.Placa);
-                        Console.WriteLine("Modelo: " + i.Modelo);
-                        Console.WriteLine("Horario do aluguel: " + i.Horario);
+                    //}
+                    //foreach (var i in relacaoCarroAlugado)
+                    //{
+                    //    Console.WriteLine("Cliente: " + i.Nome);
+                    //    Console.WriteLine("Placa: " + i.Placa);
+                    //    Console.WriteLine("Modelo: " + i.Modelo);
+                    //    Console.WriteLine("Horario do aluguel: " + i.Horario);
 
-                    }
+                    //}
 
                     Console.WriteLine("Pressione Enter para continuar ...");
                     Console.ReadKey();
@@ -132,15 +112,15 @@ public class Program
                     Console.WriteLine("Digite a placa do carro");
                     var placaAlugel = Console.ReadLine();
 
-                    var aluguel = new Aluguel
-                    {
-                        Id = new Guid(),
-                        Id_cliente = clientes.Where(x=> x.CPF == cpfAluguel).Select(y=> y.Id).FirstOrDefault(),
-                        Id_carro = veiculos.Where(x => x.Placa == placaAlugel).Select(y => y.Id).FirstOrDefault(),
-                        Horario = DateTime.Now
-                    };
+                    //var aluguel = new EntradaSaida
+                    //{
+                    //    Id = new Guid(),
+                    //    Id_cliente = clientes.Where(x => x.CPF == cpfAluguel).Select(y => y.Id).FirstOrDefault(),
+                    //    Id_carro = veiculos.Where(x => x.Placa == placaAlugel).Select(y => y.Id).FirstOrDefault(),
+                    //    HorarioEntrada = DateTime.Now
+                    //};
 
-                    alugueis.Add(aluguel);
+                    //alugueis.Add(aluguel);
 
                     Console.WriteLine("Veiculo cadastrado com sucesso ...");
                     Thread.Sleep(1000);
@@ -154,8 +134,23 @@ public class Program
 
             if (sair) break;
         }
-
-
     }
 
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureServices((hostContext, services) =>
+        {
+            // Configuração da injeção de dependência.
+            services.AddSingleton<IDatabaseConfig, DatabaseConfig>();
+            services.AddTransient<IEstacionamentoRepository, EstacionamentoRepository>();
+            services.AddTransient<IEstacionamentoService, EstacionamentoService>();
+        });
 }
+
+
+
+
+
+
+
+
