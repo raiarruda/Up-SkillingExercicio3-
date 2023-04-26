@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using SistemaEstacionamento.Data;
 using SistemaEstacionamento.Model;
+using System.Data;
 
 namespace SistemaEstacionamento.Repository
 {
@@ -14,8 +15,10 @@ namespace SistemaEstacionamento.Repository
         void InserirVeiculo(Veiculo veiculo);
         Veiculo BuscaVeiculoPorPlaca(string placa);
     }
+
     public class EstacionamentoRepository: IEstacionamentoRepository
     {
+        static readonly object _addClienteLock = new object();
 
         private readonly IDatabaseConfig _databaseConfig;
 
@@ -58,15 +61,21 @@ namespace SistemaEstacionamento.Repository
         }
         public void InserirCliente(Cliente cliente)
         {
-            using var connection = _databaseConfig.CreateConnection();
-            connection.Open();
+           // using var connection = _databaseConfig.CreateConnection();
+            //connection.Open();
 
             var sql = @"insert into cliente(nome, cpf)
             values(@nome, @cpf);";
 
+            DynamicParameters parametros = new DynamicParameters();
+            parametros.Add("Nome", cliente.Nome, DbType.String);
+            parametros.Add("Cpf", cliente.CPF, DbType.String);
 
-            var id = connection.ExecuteScalar<int>(sql, cliente);
-            cliente.Id = id;
+            lock (_addClienteLock)
+            {
+                using IDbConnection connection = _databaseConfig.CreateConnection();
+                connection.Execute(sql, parametros);
+            }
         }
 
         public void InserirVeiculo(Veiculo veiculo)
