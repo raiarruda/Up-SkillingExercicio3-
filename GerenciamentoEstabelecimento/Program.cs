@@ -6,24 +6,10 @@ List<(Guid idCliente, string marca, string modelo, string placa)> veiculos = new
 List<(Guid idCliente, DateTime entrada, DateTime saida, bool saiu)> movimentacoes = new List<(Guid, DateTime, DateTime, bool)>();
 decimal valorPorHora = 1.5M;
 
-
-var c1 = (Guid.NewGuid(), "Raissa", "123");
-var c2 = (Guid.NewGuid(), "Thiago", "456");
-var v1 = (c1.Item1, "aa", "aa", "as");
-var v2 = (c2.Item1, "55", "ww", "qq");
-var m1 = (c1.Item1, new DateTime(2023, 4, 17, 10, 30, 0), new DateTime(2023, 4, 17, 11, 40, 0), true);
-var m2 = (c2.Item1, new DateTime(2023, 4, 17, 10, 30, 0), new DateTime(2023, 4, 17, 11, 40, 0), false);
-clientes.Add(c1);
-veiculos.Add(v1);
-movimentacoes.Add(m1);
-clientes.Add(c2);
-veiculos.Add(v2);
-movimentacoes.Add(m2);
-
 while (executar)
 {
     Console.Clear();
-    Console.WriteLine(@"
+    Console.WriteLine("""
                     Escolha uma das opções abaixo:
                     1 - Cadastrar Cliente
                     2 - Listar Clientes
@@ -35,7 +21,7 @@ while (executar)
                     8 - Exibir movimentações abertas
                     9 - Alterar valor por hora;
                     0 - Sair
-                    ");
+                    """);
 
     string? opcao = Console.ReadLine();
 
@@ -78,6 +64,11 @@ while (executar)
 void RegistrarSaidaVeiculo()
 {
     Console.Clear();
+    Console.WriteLine("*******************************");
+    Console.WriteLine("********Registrar Saída********");
+    Console.WriteLine("*******************************");
+
+
 
     Console.WriteLine("Digite o cpf do dono do veiculo");
     string cpf = Console.ReadLine() ?? "";
@@ -117,8 +108,11 @@ void RegistrarSaidaVeiculo()
 void RegistrarEntradaDeVeiculo()
 {
     Console.Clear();
-
+    Console.WriteLine("*******************************");
+    Console.WriteLine("********Registrar Entrada******");
+    Console.WriteLine("*******************************");
     Console.WriteLine("Digite o cpf do dono do veiculo");
+    
     string cpf = Console.ReadLine() ?? "";
     Guid idCliente = BuscarUICliente(cpf);
 
@@ -139,7 +133,9 @@ void RegistrarEntradaDeVeiculo()
 void ExibirVeiculos()
 {
     Console.Clear();
-
+    Console.WriteLine("*******************************");
+    Console.WriteLine("********Listar Veiculos********");
+    Console.WriteLine("*******************************");
     if (!veiculos.Any())
     {
         Console.WriteLine("Não existe veiculo cadastrado");
@@ -150,12 +146,12 @@ void ExibirVeiculos()
 
     veiculos.ForEach(veiculo =>
     {
-        Console.WriteLine($@"
+        Console.WriteLine($"""
                 Cliente = {BuscarNomeCliente(veiculo.idCliente)}
                 Marca = {veiculo.marca}
                 Modelo  = {veiculo.modelo}
                 Placa  = {veiculo.placa}
-        ");
+        """);
 
     });
     CliqueParaContinuar();
@@ -166,7 +162,10 @@ void CadastrarVeiculo()
 {
 
     Console.Clear();
-
+    Console.WriteLine("*******************************");
+    Console.WriteLine("********Registrar Veiculo*******");
+    Console.WriteLine("*******************************");
+    
     Console.WriteLine("Digite o cpf do dono do veiculo");
     string cpf = Console.ReadLine() ?? "";
     Guid idCliente = BuscarUICliente(cpf);
@@ -206,6 +205,10 @@ void CadastrarVeiculo()
 void ExibirClientes()
 {
     Console.Clear();
+    Console.WriteLine("*******************************");
+    Console.WriteLine("********Exibir Clientes********");
+    Console.WriteLine("*******************************");
+
     if (!clientes.Any())
     {
 
@@ -217,11 +220,11 @@ void ExibirClientes()
 
     clientes.ForEach(cliente =>
     {
-        Console.WriteLine($@"
+        Console.WriteLine($"""
                 GUID = {cliente.id}
                 Nome = {cliente.nome}
                 CPF  = {cliente.cpf}
-        ");
+        """);
     });
 
     CliqueParaContinuar();
@@ -230,6 +233,9 @@ void ExibirClientes()
 void CadastrarCliente()
 {
     Console.Clear();
+    Console.WriteLine("*******************************");
+    Console.WriteLine("*******Registrar Cliente*******");
+    Console.WriteLine("*******************************");
 
     Console.WriteLine("Digite o nome do cliente");
     string nome = Console.ReadLine() ?? "";
@@ -241,7 +247,8 @@ void CadastrarCliente()
 
     if (nome.Length > 0 && cpf.Length > 0)
     {
-        cliente = (Guid.NewGuid(), nome, cpf); clientes.Add(cliente);
+        cliente = (Guid.NewGuid(), nome, cpf); 
+        clientes.Add(cliente);
         Console.WriteLine("Cliente cadastrado com sucesso !!");
     }
     else
@@ -270,6 +277,9 @@ string BuscarNomeCliente(Guid id)
 void AlterarValorPorHora()
 {
     Console.Clear();
+    Console.WriteLine("*******************************");
+    Console.WriteLine("********Alterar Valor********");
+    Console.WriteLine("*******************************");
 
     Console.WriteLine("Qual o valor deverá ser cobrado por hora?");
     valorPorHora = Convert.ToDecimal(Console.ReadLine());
@@ -328,6 +338,11 @@ decimal CalcularValorAPagar(TimeSpan duracao)
 void ExibirHistoricoMovimentacoesFechadas()
 {
     Console.Clear();
+
+    Console.WriteLine("********************************************");
+    Console.WriteLine("********Exibir Movimetação com Saída********");
+    Console.WriteLine("********************************************");
+
     var movimentacoesFechadas = movimentacoes.FindAll(m => m.saiu = true);
     if (!movimentacoesFechadas.Any())
     {
@@ -341,7 +356,7 @@ void ExibirHistoricoMovimentacoesFechadas()
     {
         var veiculo = BuscarInformacoesVeiculo(movimentacao.idCliente);
         var duracao = CalcularDuracaoMovimentacao(movimentacao.entrada, movimentacao.saida);
-        Console.WriteLine($@"
+        Console.WriteLine($"""
                 Nome do cliente = {BuscarNomeCliente(movimentacao.idCliente)}
                 Placa: {veiculo.placa}
                 Modelo: {veiculo.modelo}
@@ -353,7 +368,7 @@ void ExibirHistoricoMovimentacoesFechadas()
                 Tempo total: {duracao}
                 Valor total: {CalcularValorAPagar(duracao)}
 
-                ");
+                """);
     });
     CliqueParaContinuar();
     
@@ -363,6 +378,10 @@ void ExibirHistoricoMovimentacoesFechadas()
 void ExibirHistoricoMovimentacoesAbertas()
 {
     Console.Clear();
+    Console.WriteLine("********************************************");
+    Console.WriteLine("********Exibir Movimetação sem Saída********");
+    Console.WriteLine("********************************************");
+
     var movimentacoesAbertas = movimentacoes.FindAll(m => m.saiu = true);
     if (!movimentacoesAbertas.Any())
     {
@@ -375,7 +394,7 @@ void ExibirHistoricoMovimentacoesAbertas()
     movimentacoesAbertas.ForEach(movimentacao =>
     {
         var veiculo = BuscarInformacoesVeiculo(movimentacao.idCliente);
-        Console.WriteLine($@"
+        Console.WriteLine($"""
                 Nome do cliente = {BuscarNomeCliente(movimentacao.idCliente)}
                 Placa: {veiculo.placa}
                 Modelo: {veiculo.modelo}
@@ -383,7 +402,7 @@ void ExibirHistoricoMovimentacoesAbertas()
 
                 Entrada: {movimentacao.entrada.ToShortDateString()} {movimentacao.entrada.ToShortTimeString()}
               
-                ");
+                """);
     });
 
     CliqueParaContinuar();
